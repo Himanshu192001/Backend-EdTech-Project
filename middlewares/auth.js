@@ -7,7 +7,7 @@ exports.auth = async (req,res,next) =>
 {
     try{
         console.log(req , "In auth middleware");
-        const token = req.cookies.token || req.header("Authorisation").replace('Bearer',"") || req.body.token;
+        const token = req.cookies.token || req.header("Authorization")?.replace('Bearer',"") || req.body.token;
 
         //if no token 
         if(!token){
@@ -40,8 +40,6 @@ exports.auth = async (req,res,next) =>
     }
 }
 
-
-
 // isStudent 
 exports.isStudent = async (req, res, next) =>
 {
@@ -65,7 +63,6 @@ exports.isStudent = async (req, res, next) =>
 }
 
 // isInstructor
-
 exports.isInstructor = async (req, res, next) =>
 {
     try{
@@ -88,8 +85,6 @@ exports.isInstructor = async (req, res, next) =>
 }
 
 // isAdmin
-
-
 exports.isAdmin = async (req, res, next) =>
 {
     try{
