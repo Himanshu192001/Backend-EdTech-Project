@@ -13,6 +13,7 @@ exports.sendOTP = async (req , res) =>
     try{
         const {email} = req.body;
         const userExist = await Users.findOne({email});
+        
         if(userExist)
         {
             res.status(401).json({
@@ -21,26 +22,26 @@ exports.sendOTP = async (req , res) =>
             });
         }
 
-        let otp = otpGenerator.generate(6,{
+        let otp = await otpGenerator.generate(6,{
             upperCaseAlphabets:false,
             lowerCaseAlphabets:false,
             specialChars:false
         });
         
-        let result = OTP.findOne({otp});
+        let result = await OTP.findOne({otp});
         while(result)
         {
-            otp = otpGenerator.generate(6,{
+            otp = await otpGenerator.generate(6,{
                 upperCaseAlphabets:false,
                 lowerCaseAlphabets:false,
                 specialChars:false
             });
             
-            result = OTP.findOne({otp});
+            result = await OTP.findOne({otp});
         }
         console.log("OTP generated " , otp);
 
-        const otpBody = OTP.create({email , otp});
+        const otpBody = await OTP.create({email , otp});
         console.log(otpBody , "otp added in DB");
 
         res.status(200).json({
@@ -95,7 +96,9 @@ exports.signUp = async (req , res) =>
         }
 
         //check user already exist or not 
-        const isUserExist = await Users.find({email});
+        const isUserExist = await Users.findOne({email});
+
+        console.log(isUserExist)
         if(isUserExist)
         {
             return res.status(400).json({
@@ -107,7 +110,6 @@ exports.signUp = async (req , res) =>
         // find most recent otp
         const recentOTP = await  OTP.find({email}).sort({createAt:-1}).limit(1);
         // -1 means from the 'DSC' and limit 1 means only 1 doc
-        console.log("Recent OTP " , recentOTP);
 
         //validate otp
         if(recentOTP.length == 0)
@@ -116,7 +118,7 @@ exports.signUp = async (req , res) =>
                 success:false,
                 message:"OTP not found"
             })
-        }else if(otp !== recentOTP.otp)
+        }else if(otp != recentOTP[0]?.otp)
         {
             return res.status(400).json({
                  success:false,
@@ -125,7 +127,7 @@ exports.signUp = async (req , res) =>
         }
 
         //Hash Password using the bcrypt module 
-        const hashPassword = bcrypt.hash(password , 10);
+        const hashPassword = await bcrypt.hash(password , 10);
 
         //create entry in DB
 
@@ -155,6 +157,7 @@ exports.signUp = async (req , res) =>
     }
     catch(error)
     {
+        console.error(error);
         return res.status(500).json(
             {
                 success:false, 
@@ -182,7 +185,7 @@ exports.login = async (req, res) =>
         }
 
         //check user already exist or not 
-        const user = await Users.find({email}).populate('additionalDetails');
+        const user = await Users.findOne({email}).populate('additionalDetails');
         if(!user)
         {
             return res.status(400).json({

@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 exports.auth = async (req,res,next) =>
 {
     try{
-        console.log(req , "In auth middleware");
         const token = req.cookies.token || req.header("Authorization")?.replace('Bearer',"") || req.body.token;
 
         //if no token 

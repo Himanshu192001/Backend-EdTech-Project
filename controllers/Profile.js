@@ -1,6 +1,8 @@
 const Profile = require("../models/profile");
 const User = require("../models/user");
 const Course = require("../models/course");
+const {uploadImageToCloudinary} = require('../utils/imageUploader');
+require('dotenv').config();
 // const cron = require("node-cron");
 
 
@@ -124,6 +126,7 @@ exports.updateDisplayPicture = async (req, res) => {
         data: updatedProfile,
       })
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: error.message,
