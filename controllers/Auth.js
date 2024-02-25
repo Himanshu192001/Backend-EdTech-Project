@@ -60,7 +60,7 @@ exports.sendOTP = async (req , res) =>
     }
 }
 
-// Sing up
+// Sign up
 exports.signUp = async (req , res) =>
 {
     try{
@@ -110,6 +110,8 @@ exports.signUp = async (req , res) =>
         // find most recent otp
         const recentOTP = await  OTP.find({email}).sort({createAt:-1}).limit(1);
         // -1 means from the 'DSC' and limit 1 means only 1 doc
+
+        console.log(recentOTP);
 
         //validate otp
         if(recentOTP.length == 0)
@@ -200,7 +202,7 @@ exports.login = async (req, res) =>
             const payload = {
                 email : user.email,
                 id : user._id,
-                role : user.accountType
+                accountType : user.accountType
             }
             const token = jwt.sign(payload , process.env.JWT_SECRET , {expiresIn:'2h'});
             user['token'] = token;

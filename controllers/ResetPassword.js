@@ -1,7 +1,8 @@
 const User = require('../models/user');
 const mailSender = require('../utils/mailSender');
 const mailFormat = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 //resetPasswordToken
 exports.resetPasswordToken = async (req,res) =>{
@@ -14,7 +15,7 @@ exports.resetPasswordToken = async (req,res) =>{
             {
                 //generate token
 		        const token = crypto.randomBytes(20).toString("hex");
-                const updatedDetails = await User.findOneAndUpdate({email:email},{token:token,resetPasswordExpires:Date.now + 5*60*1000},{new:true});
+                const updatedDetails = await User.findOneAndUpdate({email:email},{token:token,resetPasswordExpires: Date.now() + 5*60*1000},{new:true});
 
                 const url = `http://localhost:3000/update-password/${token}`;
                 await mailSender(
@@ -48,8 +49,10 @@ exports.resetPasswordToken = async (req,res) =>{
     }
     catch(error)
     {
+        console.error(error);
         return res.status(500).json({
             success:false,
+            error : error.message,
             message:"Something went wrong !"
         })
     }
@@ -77,9 +80,9 @@ exports.resetPassword = async (req,res) =>
                     })
                 }
 
-                const hashPassword = bcrypt.hash(newPassword , 10);
+                const hashPassword = await bcrypt.hash(newPassword , 10);
 
-                const updatedUserDetail = await User.findOneAndUpdate({email:user.email},{password:hashPassword } , {new:true})
+                const updatedUserDetail = await User.findOneAndUpdate({email:user.email},{password:hashPassword } , {new:true});
 
                 return res.status(201).json({
                     success:true,
@@ -106,6 +109,7 @@ exports.resetPassword = async (req,res) =>
     }
     catch(error)
     {
+        console.error(error);
         return res.status(500).json({
             success:false,
             message:"Something went wrong !"

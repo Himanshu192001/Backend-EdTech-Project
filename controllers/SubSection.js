@@ -29,7 +29,7 @@ exports.createSubSection = async (req, res ) =>
         });
 
         //update the section with this subsection id 
-        const updatedSection = await Section.findByIdAndUpdate(sectionId , {$push:{subSection:subSection._id}} , {new:true});
+        const updatedSection = await Section.findByIdAndUpdate(sectionID , {$push:{subSection:subSection._id}} , {new:true}).populate('subSection').exec();
 
         return res.status(200).json({
             success:true,
@@ -39,6 +39,7 @@ exports.createSubSection = async (req, res ) =>
     }
     catch(error)
     {
+        console.error(error);
         res.status(500).json({
             success:false,
             message:"Internal Server Error!"

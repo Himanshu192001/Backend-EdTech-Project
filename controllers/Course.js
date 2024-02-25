@@ -11,13 +11,14 @@ exports.createCourse = async (req , res ) =>
     try{
 
         // data of the course getting Category id in body
-        const {courseName , courseDescription , whatYouWillLearn , price ,tag ,  Category , status , instructions} = req.body;
-
+        let {courseName , courseDescription , whatYouWillLearn , price ,tag ,  category , status , instructions} = req.body;
+        console.log(req.body);
         //get the thumbnail of the course 
         const thumbnail = req.files.thumbnailImage;
+        console.log(thumbnail);
 
         //validation on the course data
-        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !Category || !thumbnail )
+        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !category || !thumbnail )
         {
             return res.status(400).json({
                 success:false,
@@ -40,7 +41,7 @@ exports.createCourse = async (req , res ) =>
         }
 
 
-        const CategoryDetails = await Category.findById(Category);
+        const CategoryDetails = await Category.findById(category);
         if(!CategoryDetails)
         {
             return res.status(400).json({
@@ -62,10 +63,10 @@ exports.createCourse = async (req , res ) =>
             price,
             tag:tag,
             thumbnail: thumbnailImage.secure_url,
-            Category:CategoryDetails._id,
+            category:CategoryDetails._id,
             status:status,
             instructions:instructions,
-        });
+        } , {new : true});
 
         //add an entry of the course in the instructor schema 
         await User.findByIdAndUpdate(
@@ -95,6 +96,7 @@ exports.createCourse = async (req , res ) =>
     }
     catch(error)
     {
+        console.error(error);
         return res.status(500).json({
             success:false,
             message:"Internal server error !"
